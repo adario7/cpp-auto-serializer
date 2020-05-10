@@ -1,0 +1,19 @@
+` using namespace std; `
+
+`struct st3b;`
+
+struct st3a {
+	int val_a = `15`;
+	st3b* ptr_to_b;
+};
+
+struct st3b {
+	float val_b = `7.77`;
+	st3a* ptr_to_a;
+};
+
+// just a wrapper
+struct st3 {
+	st3a* real;
+};
+

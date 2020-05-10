@@ -1,0 +1,36 @@
+`
+#include <string>
+#include <vector>
+using namespace std;
+`
+
+polymorphic base4 : child4a, child4b;
+
+virtual class base4 {
+public:
+	int data_base = `111`;
+};
+
+virtual class child4a : public base4 {
+public:
+	std::string data_a = `"initial4a"`;
+	`
+	child4a() {}
+	child4a(int i, const std::string& s) : data_a(s) { data_base = i; }
+	`
+};
+
+virtual class child4b : public base4 {
+public:
+	std::vector<float> data_b = `{2.22, 3.33, 4.44}`;
+	`
+	child4b() {}
+	child4b(int i, std::vector<float> v) : data_b(v) { data_base = i; }
+	`
+};
+
+struct st4 {
+	base4* base_ptr_a;
+	base4* base_ptr_b;
+};
+

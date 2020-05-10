@@ -1,0 +1,30 @@
+` using namespace std; `
+`
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+`
+
+// commento
+/* altro
+ * commento */
+
+struct st1 {
+	int a = `444`, b = `555`;
+	int* ptr = `nullptr`;
+	std::string str = `"initial value"`;
+	std::vector<string> strings;
+	std::vector<vector<int>> matrix;
+	std::set<double> doubles;
+	std::map<int, float> intToFloat;
+
+	int s_array[`5`] = `{ 11, 22, 33, 44, 55 }`;
+	int s_matrix[`3`][`2`] = `{ {10,20}, {31,41}, {50,60} }`;
+
+`
+	int getSum(int j) {
+		return a + b;
+	}
+`
+};

@@ -1,0 +1,20 @@
+`
+#include <string>
+#include <vector>
+#include <types1.hh>
+`
+
+// commento
+/* altro
+ * commento */
+
+struct st2 {
+	int a = `3`, b = `3`;
+	st1 sub1;
+	vector<st1> vec1;
+`
+	int getDiff(int j) {
+		return a - b;
+	}
+`
+};
