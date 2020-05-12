@@ -55,6 +55,7 @@ void deserialize_field(const std::string& fname, const NType& t, std::ostream& o
 		o << "\t\t\t__s >> ((" << #type << "&) " << fname << ");" << endl; \
 	} 
 
+_NATIVE_M(bool)
 _NATIVE_M(int8_t) _NATIVE_M(int16_t) _NATIVE_M(int32_t) _NATIVE_M(int64_t)
 _NATIVE_M(uint8_t) _NATIVE_M(uint16_t) _NATIVE_M(uint32_t) _NATIVE_M(uint64_t)
 _NATIVE_M(float) _NATIVE_M(double)
@@ -212,11 +213,13 @@ void w_pointer(const string& fname, const NType& t, ostream& o) {
 rw_pair rw_object = _P(object);
 rw_pair rw_static_array = _P(static_array);
 
+// shortcut macros for accessing `type_map`
 #define _T(x) types_map[#x]
-#define _STD_T(x) _T(x) = _T(std::x)
-#define _US_T(x) _T(u ## x) = _T(unsigned x)
+#define _STD_T(x) _T(x) = _T(std::x) // `string` and `std::string`
+#define _US_T(x) _T(u ## x) = _T(unsigned x) // `uint` and `unsigned int`
 
 void init_types() {
+	_T(bool) = _P(bool);
 	_T(char) = _P(int8_t);
 	_US_T(char) = _P(uint8_t);
 	_T(int8_t) = _P(int8_t);
@@ -241,4 +244,9 @@ void init_types() {
 	_STD_T(map) = _STD_T(unordered_map) = _P(map);
 }
 
-
+void add_alias(const segment_t pos, const string& name, const string& real) {
+	auto itr = types_map.find(real);
+	if (itr == types_map.end())
+		throw runtime_error("at " + to_string(pos) + ": unknown type " + real);
+	types_map[name] = itr->second;	
+}

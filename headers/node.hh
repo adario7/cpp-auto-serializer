@@ -158,3 +158,12 @@ public:
 		: NRoot(p), subject(s), children(c) {}
 	virtual ~NPolym() { delete subject; _DEL_VEC(children); }
 };
+
+class NAlias : public NRoot {
+public:
+	bool in_code; // wheter it is only useful for the serializer if it goes in the real header
+	NType *name, *real;
+	NAlias(segment_t p, bool i, NType* n, NType* r)
+		: NRoot(p), in_code(i), name(n), real(r) {}
+	virtual ~NAlias() { delete name; delete real; }
+};

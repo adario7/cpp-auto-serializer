@@ -45,6 +45,8 @@ int prev_yylineno = yylineno;
 "class"                     { return TOKEN(T_CLASS); }
 "polymorphic"               { return TOKEN(T_POLYM); }
 "virtual"                   { return TOKEN(T_VIRTUAL); }
+"using"                     { return TOKEN(T_USING); }
+"alias"                     { return TOKEN(T_ALIAS); }
 
 	/* put `::` inside the identifiers */
 [a-zA-Z_](::|[a-zA-Z0-9_])* { SAVE_TOKEN; return T_IDENTIFIER; }

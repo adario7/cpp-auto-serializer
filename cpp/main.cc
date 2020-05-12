@@ -21,11 +21,19 @@ using namespace std;
 #define TYPE_UNKN(var) \
 	else throw runtime_error(string(__FILE__  ":" _S(__LINE__) " - unknown type for " #var ": ") + typeid(*var).name());
 
-ofstream hout, // header (.hh)
-		 dout; // data (.cc)
+ofstream hout, // header-out (.hh)
+		 dout; // data-out   (.cc)
 
 void compileRoot(NPolym* np) {
 	register_polym(np, dout);
+}
+
+void compileRoot(NAlias* alias) {
+	string name_s = to_string(*alias->name), real_s = to_string(*alias->real);
+	add_alias(alias->pos, name_s, real_s);
+	if (alias->in_code) { // `using` is reflected on the header, `alias` is not
+		hout << "using " << name_s << " = " << real_s << ";" << endl;
+	}
 }
 
 void compileCode(string* value) {

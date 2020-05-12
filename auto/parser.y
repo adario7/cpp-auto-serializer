@@ -6,6 +6,7 @@
 	extern void compileRoot(NCode*);
 	extern void compileRoot(NStruct*);
 	extern void compileRoot(NPolym*);
+	extern void compileRoot(NAlias*);
 	extern int yylineno; 
 
     int yylex();
@@ -42,6 +43,7 @@
 	GenericsList* generics_list;
 	BodyList* body_list;
 	ParentsList* parents_list;
+	NAlias* alias;
 
     std::string* string;
 	bool boolean;
@@ -53,7 +55,7 @@
    they represent. */
 %token END 0 "end of file"
 %token <string> T_CODE "code literal (`...`)" T_IDENTIFIER "identifier"
-%token <token> T_STRUCT "struct" T_CLASS "class" T_POLYM "polymorphic" T_VIRTUAL "virtual"
+%token <token> T_STRUCT "struct" T_CLASS "class" T_POLYM "polymorphic" T_VIRTUAL "virtual" T_USING "using" T_ALIAS "alias"
 %token <token> T_COMMA "," T_DOT "." T_SEMIC ";" T_AT "@" T_EQ "=" T_STAR "*" T_COLONS ":" 
 %token <token> T_L_BRACE "{" T_R_BRACE "}" T_L_ACUTE "<" T_R_ACUTE ">" T_OPEN_SQ "[" T_CLOSE_SQ "]"
 
@@ -69,7 +71,7 @@
 %type <var_decl> var_decl
 %type <code> root_code 
 %type <string> code_block code_block_0
-%type <boolean> cls_or_struct virtual_as_bool
+%type <boolean> cls_or_struct virtual_as_bool using_or_alias
 %type <body_elem> body_elem
 %type <body_list> struct_body struct_body_0
 %type <nstruct> nstruct
@@ -77,6 +79,7 @@
 %type <parents_list> parents_list parents_list_c
 %type <parent_class> parent_class
 %type <array_suff> array_suff array_suff_0
+%type <alias> alias
 
 %start program
 
@@ -91,6 +94,7 @@ rootelems : rootelem
 rootelem : nstruct { compileRoot($1); delete $1; }
 		 | root_code { compileRoot($1); delete $1; }
 		 | polym { compileRoot($1);  /* don't delete, as the data is persistent */ }
+		 | alias { compileRoot($1); }
 		 ;
 
 /* at least one block of code */
@@ -182,5 +186,13 @@ nstruct : virtual_as_bool cls_or_struct type parents_list T_L_BRACE struct_body_
 
 polym : T_POLYM type ":" generics_content T_SEMIC { $$ = new NPolym(_P(@$), $2, $4); }
 	  ;
+
+using_or_alias : "using" { $$ = true; }
+			   | "alias" { $$ = false; }
+			   ;
+
+alias : using_or_alias type "=" type T_SEMIC { $$ = new NAlias(_P(@$), $1, $2, $4); }
+	  ;
+
 
 %%

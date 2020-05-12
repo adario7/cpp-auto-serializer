@@ -37,7 +37,9 @@ int do_121(T& val) {
 // std types test
 int test1() {
 	st1 v;
-
+	v.a = ST1_A;
+	v.b = (my_int64) 2000;
+	v.does_it_work = true;
 	v.strings = { "hey", "there" };
 	v.matrix = { { 3, 5, 6},
 	             { 6, 7, 7, 9 },

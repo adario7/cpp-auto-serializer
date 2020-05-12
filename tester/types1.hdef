@@ -1,21 +1,27 @@
-` using namespace std; `
 `
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
+
+enum st1_enum : int {
+	ST1_A, ST1_B
+};
 `
 
-// commento
-/* altro
- * commento */
+using my_int64 = long; // copied int the output header
+/* only for internal usage of the auto serailizer,
+ * will be discarded during the header generation */
+alias st1_enum = int; 
 
 struct st1 {
-	int a = `444`, b = `555`;
+	st1_enum a = `ST1_B`;
+	my_int64 b = `555`;
+	bool does_it_work = `false`;
 	int* ptr = `nullptr`;
+	std::vector<std::string> strings = `{ "v_0", "v_1" }`;
 	std::string str = `"initial value"`;
-	std::vector<string> strings;
-	std::vector<vector<int>> matrix;
+	std::vector<std::vector<int>> matrix;
 	std::set<double> doubles;
 	std::map<int, float> intToFloat;
 
@@ -24,7 +30,8 @@ struct st1 {
 
 `
 	int getSum(int j) {
-		return a + b;
+		return a + b + j;
 	}
+	int getDiff(int k);
 `
 };
