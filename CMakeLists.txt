@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16.2)
+cmake_minimum_required(VERSION 3.17)
 project(auto-serializer)
 # set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
@@ -8,11 +8,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
-FLEX_TARGET(ASScanner auto/lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/tab/lexer.cc DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/tab/lexer.hh)
-BISON_TARGET(ASParser auto/parser.y ${CMAKE_CURRENT_BINARY_DIR}/tab/parser.cc)
+set(TAB_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tab)
+file(MAKE_DIRECTORY ${TAB_DIRECTORY}) # ensure the directory is created
+FLEX_TARGET(ASScanner auto/lexer.l  ${TAB_DIRECTORY}/lexer.cc DEFINES_FILE ${TAB_DIRECTORY}/lexer.hh)
+BISON_TARGET(ASParser auto/parser.y ${TAB_DIRECTORY}/parser.cc)
 ADD_FLEX_BISON_DEPENDENCY(ASScanner ASParser)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/tab)
+include_directories(${TAB_DIRECTORY})
 include_directories(headers)
 file(GLOB_RECURSE SOURCES "cpp/*.cc")
 
