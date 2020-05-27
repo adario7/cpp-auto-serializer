@@ -219,8 +219,7 @@ int main(int argc, char **argv) {
 	hout << "#pragma once" << endl
 		<< "#include <functional>" << endl // for callbacks
 		<< "#include <unordered_map>" << endl // for state
-		<< "#include <istream>" << endl // for deserialization input
-		<< "#include <ostream>" << endl // for serialization output
+		<< "#include <iosfwd>" << endl // for (de)serialization input/output
 		<< "struct __deserialization_ptr;" << endl;
 	dout << "#include \"" << argv[2] << "\"" << endl 
 		<< "#include <ostream>" << endl
