@@ -40,6 +40,12 @@ int prev_yylineno = yylineno;
 "public"                    { SAVE_TOKEN; return T_CODE; }
 "protected"                 { SAVE_TOKEN; return T_CODE; }
 "private"                   { SAVE_TOKEN; return T_CODE; }
+	/* matches any C interger or float number, see https://people.cs.aau.dk/~marius/sw/flex/Flex-Regular-Expressions.html */
+-?([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?) { SAVE_TOKEN; return T_CODE; }
+"true"                     { SAVE_TOKEN; return T_CODE; }
+"false"                    { SAVE_TOKEN; return T_CODE; }
+\'(\\.|[^'\\])*\'          { SAVE_TOKEN; return T_CODE; }
+\"(\\.|[^"\\])*\"          { SAVE_TOKEN; return T_CODE; }
 
 "struct"                    { return TOKEN(T_STRUCT); }
 "class"                     { return TOKEN(T_CLASS); }
