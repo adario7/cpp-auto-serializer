@@ -29,10 +29,10 @@ void compileRoot(NPolym* np) {
 }
 
 void compileRoot(NAlias* alias) {
-	string name_s = to_string(*alias->name), real_s = to_string(*alias->real);
-	add_alias(alias->pos, name_s, real_s);
+	string name_s = to_string(*alias->name);
+	add_alias(alias->pos, name_s, alias->real);
 	if (alias->in_code) { // `using` is reflected on the header, `alias` is not
-		hout << "using " << name_s << " = " << real_s << ";" << endl;
+		hout << "using " << name_s << " = " << to_cpp_type(*alias->real) << ";" << endl;
 	}
 }
 
@@ -46,9 +46,9 @@ void compileRoot(NCode* code_node) {
 	hout << endl;
 }
 
-// compile to header and serialization
+// compile into the real header and into the serialization function
 void compileBlock(NStruct* st, NVarBlock* block) {
-	hout << "\t" << *block->type;
+	hout << "\t" << to_cpp_type(*block->type);
 	VarDeclList& list = *block->vars;
 	for (int i = 0; i < list.size(); i++) {
 		NVarDeclaration& dec = *list[i];
@@ -69,7 +69,7 @@ void compileBlock(NStruct* st, NVarBlock* block) {
 	}
 }
 
-// compile to deserialization
+// compile into deserialization function
 void compileDsBlock(NStruct* st, NVarBlock* block) {
 	VarDeclList& list = *block->vars;
 	for (NVarDeclaration* decl_ptr : list) {
@@ -164,6 +164,7 @@ void compileRoot(NStruct* st) {
 		<< "\t\t\telse __done.insert(__p.first);" << endl
 		<< "\t\t\t__s << ((size_t) __p.first) << ' ';" << endl
 		<< "\t\t\t__p.second();" << endl
+		<< "\t\t\t__s << endl;" << endl
 		<< "\t\t}" << endl
 		<< "\t}" << endl
 		<< "}" << endl << endl;

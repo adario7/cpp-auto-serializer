@@ -64,7 +64,7 @@
 %type <token> type_suffix
 %type <type_suffixes> type_suffixes type_suff_0
 %type <generics_list> generics_content
-%type <type> type
+%type <type> decl_type compl_type
 %type <ident> ident
 %type <vars_block> vars_block
 %type <vars_list> var_decls
@@ -129,18 +129,26 @@ array_suff_0 : %empty { $$ = new ArraySuffixList(); }
 			 | array_suff { $$ = $1; }
 			 ;
 
-generics_content : type { $$ = new GenericsList(); $$->push_back($1); }
-			     | generics_content "," type { $1->push_back($3); }
+generics_content : compl_type { $$ = new GenericsList(); $$->push_back($1); }
+			     | generics_content "," compl_type { $1->push_back($3); }
 			     ;
 
-type : ident "<" generics_content ">" { $$ = new NType(_P(@$), $1, $3); }
-     | ident { $$ = new NType(_P(@$), $1, new GenericsList()); }
-	 ;
+/* a complete type, it may include '*' and '[]' */
+compl_type : ident "<" generics_content ">" { $$ = new NType(_P(@$), $1, $3); }
+           | ident { $$ = new NType(_P(@$), $1, new GenericsList()); }
+		   | compl_type "*" { $$ = NType::pointerTo($1, _P(@$)); }
+		   | compl_type "[" T_CODE "]" { $$ = NType::arrayOf($1, $3, _P(@$)); }
+	       ;
+
+/* type for declarations: '*' and '[]' are bound to the variable name */
+decl_type : ident "<" generics_content ">" { $$ = new NType(_P(@$), $1, $3); }
+          | ident { $$ = new NType(_P(@$), $1, new GenericsList()); }
+	      ;
 
 ident : T_IDENTIFIER { $$ = new NIdentifier(_P(@$), std::move(*$1)); delete $1; }
       ;
 
-vars_block : type var_decls T_SEMIC { $$ = new NVarBlock(_P(@$), $1, $2); }
+vars_block : decl_type var_decls T_SEMIC { $$ = new NVarBlock(_P(@$), $1, $2); }
 		  ;
 
 var_decls : var_decl { $$ = new VarDeclList(); $$->push_back($<var_decl>1); }
@@ -171,7 +179,7 @@ struct_body_0 : struct_body
 virtual_as_bool : "virtual" { $$ = true; }
 				| %empty { $$ = false; } ;
 
-parent_class : code_block_0 type code_block_0 { $$ = new NParent(_P(@$), $1, $2, $3); }
+parent_class : code_block_0 decl_type code_block_0 { $$ = new NParent(_P(@$), $1, $2, $3); }
 
 parents_list_c : parent_class { $$ = new ParentsList(); $$->push_back($1); }
 			   | parents_list_c "," parent_class { $1->push_back($3); }
@@ -181,17 +189,17 @@ parents_list : ":" parents_list_c { $$ = $2; }
 			 | %empty { $$ = new ParentsList(); }
 			 ;
 
-nstruct : virtual_as_bool cls_or_struct type parents_list T_L_BRACE struct_body_0 T_R_BRACE T_SEMIC
+nstruct : virtual_as_bool cls_or_struct decl_type parents_list T_L_BRACE struct_body_0 T_R_BRACE T_SEMIC
             	{ $$ = new NStruct(_P(@$), $1, $2, $3, $4, $6); } ; 
 
-polym : T_POLYM type ":" generics_content T_SEMIC { $$ = new NPolym(_P(@$), $2, $4); }
+polym : T_POLYM decl_type ":" generics_content T_SEMIC { $$ = new NPolym(_P(@$), $2, $4); }
 	  ;
 
 using_or_alias : "using" { $$ = true; }
 			   | "alias" { $$ = false; }
 			   ;
 
-alias : using_or_alias type "=" type T_SEMIC { $$ = new NAlias(_P(@$), $1, $2, $4); }
+alias : using_or_alias decl_type "=" compl_type T_SEMIC { $$ = new NAlias(_P(@$), $1, $2, $4); }
 	  ;
 
 

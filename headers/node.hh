@@ -59,6 +59,7 @@ public:
 	NType(segment_t p, NIdentifier* n, GenericsList* g)
 		: Node(p), name(n), generics(g) {}
 	virtual ~NType() { delete name; delete generics; }
+
 	NType* deepCopy() const {
 		GenericsList* l = new GenericsList();
 		for (const NType* child : *generics)
@@ -67,9 +68,28 @@ public:
 		NIdentifier* idt = new NIdentifier(name->pos, std::move(namecpy));
 		return new NType(pos, idt, l);
 	}
+
+	static NType* pointerTo(NType* obj, segment_t pos) {
+		GenericsList* l = new GenericsList();
+		l->push_back(obj);
+		return new NType(pos, new NIdentifier(pos, "*"), l);
+	}
+
+	static NType* arrayOf(NType* obj, std::string* size, segment_t pos) {
+		GenericsList* l = new GenericsList();
+		l->push_back(obj);
+		std::string size_cp = *size;
+		NType* r = new NType(pos, new NIdentifier(pos, std::move(size_cp)), l);
+		r->isArray = true; // the identifier is the size, not the name
+		return r;
+	}
 };
 
+// converts to the internal name format
 std::string to_string(const NType& t);
+// converts to the C++ name format
+std::string to_cpp_type(const NType& t);
+// converts to the internal name format
 std::ostream& operator<<(std::ostream& o, const NType& t);
 bool operator==(const NType& a, const NType& b);
 namespace std {
@@ -102,19 +122,12 @@ public:
 		// complete type: int* --> *<int> and int* a, b --> *<int> a; int b
 		for (NVarDeclaration* d : *vars) {
 			NType* ct = type->deepCopy(); 
-			for (int i = 0; i < d->tSuffixes->size(); i++) {
-				GenericsList* l = new GenericsList();
-				l->push_back(ct);
-				ct = new NType(d->pos, new NIdentifier(d->pos, "*"), l);
-			}
+			for (int i = 0; i < d->tSuffixes->size(); i++)
+				ct = NType::pointerTo(ct, d->pos);
 			// loop backwards otherwise dimesntions will be inverted
 			for (int i = d->arraySuffixes->size() - 1; i >= 0; i--) {
 				std::string* size = (*d->arraySuffixes)[i];
-				GenericsList* l = new GenericsList();
-				l->push_back(ct);
-				std::string size_copy = *size;
-				ct = new NType(d->pos, new NIdentifier(d->pos, std::move(size_copy)), l);
-				ct->isArray = true; // the identifier is the size, not the name
+				ct = NType::arrayOf(ct, size, d->pos);
 			}
 			d->completeType = ct;
 		}

@@ -13,38 +13,66 @@ using namespace std;
 using rw_function = function<void(const string&, const NType&, ostream&)>;
 struct rw_pair { rw_function read, write; };
 #define _P(name) rw_pair{r_##name, w_##name}
-std::unordered_map<string, rw_pair> types_map;
+
 extern rw_pair rw_object, rw_static_array; // declared down
 
-const rw_pair& find_type_pair(const NType& t) {
-	// arrays are saved like: int[`5`] --> []<int>
-	if (t.isArray) return rw_static_array;
-	const string& tname = t.name->value;
+std::unordered_map<std::string, rw_pair> types_map;
+std::unordered_map<std::string, const NType*> alias_map;
+
+/* finds an appropriate `rw_pair` for the type `t`.
+ * if the type is found to be an alias, it is replaced by the real type
+ * to avoid losing generic types information (hence the reference to pointer) */
+const rw_pair& find_type_pair(const NType*& t) {
+	// recursively resolve aliases
+	while (true) {
+		// arrays are saved like: int[`5`] --> []<int>
+		if (t->isArray) return rw_static_array;
+
+		auto itr = alias_map.find(t->name->value);
+		if (itr == alias_map.end()) break;
+		t = itr->second;
+	}
+
+	const string tname = t->name->value;
 	auto itr = types_map.find(tname);
 	if (itr == types_map.end()) return rw_object;
 	return itr->second;
 }
 
-void serialize_value(const std::string& fname, const NType& t, std::ostream& o) {
-	const rw_pair& pair = find_type_pair(t);
+void serialize_value(const std::string& fname, const NType& t, const rw_pair& pair, std::ostream& o) {
 	pair.write(fname, t, o);
 }
+void serialize_value(const std::string& fname, const NType& t, std::ostream& o) {
+	const NType* real_t = &t;
+	const rw_pair& pair = find_type_pair(real_t);
+	serialize_value(fname, *real_t, pair, o);
+}
 
-void serialize_field(const std::string& fname, const NType& t, std::ostream& o) {
-	o << "\t__s << \"" << fname << " " << t << " \";" << endl;
-	serialize_value(fname, t, o);
+void serialize_field(const std::string& fname, const NType& orig_t, std::ostream& o) {
+	// find the pair immediately to reasolve aliases, and use only resolved names in the output file
+	const NType* real_t = &orig_t;
+	const rw_pair& pair = find_type_pair(real_t);
+	o << "\t__s << \"" << fname << " " << *real_t << " \";" << endl;
+	serialize_value(fname, *real_t, pair, o);
 	o << "\t__s << endl;" << endl;
 }
 
-void deserialize_value(const std::string& fname, const NType& t, std::ostream& o) {
-	const rw_pair& pair = find_type_pair(t);
+void deserialize_value(const std::string& fname, const NType& t, const rw_pair& pair, std::ostream& o) {
 	pair.read(fname, t, o);
 }
+void deserialize_value(const std::string& fname, const NType& t, std::ostream& o) {
+	// find the pair immediately to reasolve aliases, and use only resolved names in the output file
+	const NType* real_t = &t;
+	const rw_pair& pair = find_type_pair(real_t);
+	deserialize_value(fname, *real_t, pair, o);
+}
 
-void deserialize_field(const std::string& fname, const NType& t, std::ostream& o) {
-	o << "\t\t\t__TYPE_CHK(\"" << t << "\");" << endl
+void deserialize_field(const std::string& fname, const NType& orig_t, std::ostream& o) {
+	const NType* real_t = &orig_t;
+	const rw_pair& pair = find_type_pair(real_t);
+	o << "\t\t\t__TYPE_CHK(\"" << *real_t << "\");" << endl
 		<< "\t\t\tauto& " << fname << " = __v." << fname << ";" << endl;
-	deserialize_value(fname, t, o);
+	deserialize_value(fname, *real_t, pair, o);
 }
 
 #define _NATIVE_M(type) \
@@ -244,9 +272,9 @@ void init_types() {
 	_STD_T(map) = _STD_T(unordered_map) = _P(map);
 }
 
-void add_alias(const segment_t pos, const string& name, const string& real) {
-	auto itr = types_map.find(real);
-	if (itr == types_map.end())
-		throw runtime_error("at " + to_string(pos) + ": unknown type " + real);
-	types_map[name] = itr->second;	
+void add_alias(const segment_t pos, const string& name, const NType* real) {
+	auto itr = alias_map.find(name);
+	if (itr != alias_map.end())
+		throw runtime_error("at " + to_string(pos) + ": redeclaration of alias " + name);
+	alias_map[name] = real;
 }

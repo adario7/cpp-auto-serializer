@@ -10,6 +10,8 @@ enum st1_enum : int {
 `
 
 using my_int64 = long; // copied int the output header
+using s_array_type = int[`5`];
+using doubles_set = std::set<double>;
 /* only for internal usage of the auto serailizer,
  * will be discarded during the header generation */
 alias st1_enum = int; 
@@ -19,13 +21,14 @@ struct st1 {
 	my_int64 b = `555`;
 	bool does_it_work = `false`;
 	int* ptr = `nullptr`;
+	std::vector<float*> ptrVec = ` { nullptr } `;
 	std::vector<std::string> strings = `{ "v_0", "v_1" }`;
 	std::string str = `"initial value"`;
 	std::vector<std::vector<int>> matrix;
-	std::set<double> doubles;
+	doubles_set doubles;
 	std::map<int, float> intToFloat;
 
-	int s_array[`5`] = `{ 11, 22, 33, 44, 55 }`;
+	s_array_type s_array = `{ 11, 22, 33, 44, 55 }`;
 	int s_matrix[`3`][`2`] = `{ {10,20}, {31,41}, {50,60} }`;
 
 `

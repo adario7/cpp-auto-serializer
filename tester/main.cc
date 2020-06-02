@@ -48,6 +48,9 @@ int test1() {
 	v.intToFloat = { {0, 1}, {1, 2.72}, {2, 7.39} };
 	v.ptr = new int;
 	*v.ptr = 1234321;
+	v.ptrVec = { new float, new float };
+	*(v.ptrVec[0]) = 123.456;
+	*(v.ptrVec[1]) = 654.321;
 	v.s_array[3] = 444444;
 	v.s_matrix[1][1] = 444111;
 
@@ -95,6 +98,10 @@ int test4() {
 	return do_121<st4>(v);
 }
 
+#define _TEST(n) \
+	cout << "--- TEST " << #n << " ---" << endl << endl; \
+	return test##n();
+
 int main() {
-	return test1();
+	_TEST(1);
 }
