@@ -178,12 +178,11 @@ void r_map(const string& fname, const NType& t, ostream& o) {
 	const NType& k_t = *list[0], &v_t = *list[1]; // checks already performed when writing
 	o << "\t\t\tsize_t __" << fname << "_sz; ; __s >> __" << fname << "_sz;" << endl
 		<< "\t\t" << _GENERATE_FOR
-		<< "\t\t\t" << to_cpp_type(k_t) << " __k_" << fname << ";" << endl
-		<< "\t\t\t" << to_cpp_type(v_t) << " __v_" << fname << ";" << endl;
+		<< "\t\t\t" << to_cpp_type(k_t) << " __k_" << fname << ";" << endl;
 	deserialize_value("__k_" + fname, k_t, o);
+	o << "\t\t\t" << to_cpp_type(v_t) << "& __v_" << fname << " = " << fname << "[__k_" << fname << "];" << endl;
 	deserialize_value("__v_" + fname, v_t, o);
-	o << "\t\t\t" << fname << "[__k_" << fname << "] = __v_" << fname << ";" << endl
-		<< "\t\t\t}" << endl;
+	o << "\t\t\t}" << endl;
 }
 
 void r_object(const string& fname, const NType& t, ostream& o) {
