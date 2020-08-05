@@ -1,0 +1,12 @@
+`
+#include <types4.hh>
+`
+
+virtual class child4a : public base4 {
+public:
+	std::string data_a = "initial4a";
+	`
+	child4a() {}
+	child4a(int i, const std::string& s) : base4(i), data_a(s) {}
+	`
+};

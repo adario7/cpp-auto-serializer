@@ -12,7 +12,7 @@ struct st3b {
 	st3a* ptr_to_a;
 };
 
-// just a wrapper
+// pointers can't be serialized directly, so this is a wrapper
 struct st3 {
 	st3a* real;
 };

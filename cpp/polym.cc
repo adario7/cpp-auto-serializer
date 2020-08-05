@@ -21,18 +21,27 @@ int polym_counter = 1;
 
 void register_polym(NPolym* np, ostream& dout) {
 	NType* k = np->subject;
-	np->children->push_back(k); // a polymorphic type could also be itself
+	// a polymorphic type could also be itself at runtime
+	np->children->push_back(new NPolymElem(k->pos, k, false, nullptr));
 	auto itr = polymMap.find(k);
 	if (itr != polymMap.end())
 		throw runtime_error("error at " + to_string(k->pos) + ": polymorphic children of '"
 			+ to_string(*k) + "' declared twice");
 	int n = polymMap[k] = polym_counter++;
 
+	// because we need constructors and methods access, we need to include every child-header
+	for (const NPolymElem* pelem : *np->children) {
+		if (pelem->include) {
+			char d1, d2;
+			if (pelem->includeLocal) { d1=d2='"'; } else { d1='<';d2='>'; }
+			dout << "#include " << d1 << *pelem->include << d2 << endl;
+		}
+	}
 	dout << "static unordered_map<string, function<void*("
 		<< "istream&, function<bool(string)>, unordered_map<size_t,__deserialization_ptr>&"
 		<< ")>>  __polym_map_" << n << " = {" << endl;
-	for (const NType* _child : *np->children) {
-		const NType& child = *_child;
+	for (const NPolymElem* pelem : *np->children) {
+		const NType& child = *pelem->type;
 		dout << "\t{\"" << child << "\", [](istream& __s, function<bool(string)> __e, unordered_map<size_t, __deserialization_ptr>& __pm) -> void* {" << endl
 			<< "\t\t" << child << "* __v = new " << child << "();" << endl
 			<< "\t\t" << child << "& __r = *__v;" << endl;

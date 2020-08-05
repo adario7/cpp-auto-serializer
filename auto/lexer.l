@@ -16,6 +16,7 @@ int yycolumn = 1;
 int prev_yylineno = yylineno;
 
 #define SAVE_TOKEN yylval.string = new std::string(yytext, yyleng)
+#define SAVE_TOKEN_NO_DELIM yylval.string = new std::string(yytext+1, yyleng-2)
 #define TOKEN(t) (yylval.token = t)
 
 #define YY_USER_ACTION                                                   \
@@ -44,8 +45,6 @@ int prev_yylineno = yylineno;
 -?([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?) { SAVE_TOKEN; return T_CODE; }
 "true"                     { SAVE_TOKEN; return T_CODE; }
 "false"                    { SAVE_TOKEN; return T_CODE; }
-\'(\\.|[^'\\])*\'          { SAVE_TOKEN; return T_CODE; }
-\"(\\.|[^"\\])*\"          { SAVE_TOKEN; return T_CODE; }
 
 "struct"                    { return TOKEN(T_STRUCT); }
 "class"                     { return TOKEN(T_CLASS); }
@@ -55,8 +54,11 @@ int prev_yylineno = yylineno;
 "alias"                     { return TOKEN(T_ALIAS); }
 
 	/* put `::` inside the identifiers */
-[a-zA-Z_](::|[a-zA-Z0-9_])* { SAVE_TOKEN; return T_IDENTIFIER; }
-`([^`]|``)*`                { yylval.string = new std::string(yytext+1, yyleng-2); return T_CODE; }
+`([^`]|``)*`                 { SAVE_TOKEN_NO_DELIM; return T_CODE; }
+\"(\\.|[^\"\\])*\"           { SAVE_TOKEN; return T_CODE; }
+include\ <(\\.|[^>\\])*>     { yylval.string = new std::string(yytext+9, yyleng-10); return T_SYSTEM_INC; }
+include\ \"(\\.|[^\"\\])*\"  { yylval.string = new std::string(yytext+9, yyleng-10); return T_LOCAL_INC; }
+[a-zA-Z_](::|[a-zA-Z0-9_])*  { SAVE_TOKEN; return T_IDENTIFIER; }
 
 "{"                         { return TOKEN(T_L_BRACE); }
 "}"                         { return TOKEN(T_R_BRACE); }

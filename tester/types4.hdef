@@ -4,33 +4,38 @@
 using namespace std;
 `
 
-polymorphic base4 : child4a, child4b;
+/* specify which type a base4* could be at runtime.
+ * the generated deserialization code needs to include the children header
+ * but doing so here (in this .def header) would create a cyclic dependency;
+ * when we specify the children header in this way it is only included in the generated implementation code
+*/
+polymorphic base4 :
+    child4a include "types4a.hh",
+    child4b include "types4b.hh",
+	child4c /* don't need to include because it is in the same .hdef header*/;
 
 virtual class base4 {
 public:
-	int data_base = `111`;
+	int data_base = 111;
+`
+	base4() {}
+	base4(int i) : data_base(i) {}
+`
 };
 
-virtual class child4a : public base4 {
+virtual class child4c : public base4 {
 public:
-	std::string data_a = `"initial4a"`;
+	double data_c = 3.1415;
 	`
-	child4a() {}
-	child4a(int i, const std::string& s) : data_a(s) { data_base = i; }
-	`
-};
-
-virtual class child4b : public base4 {
-public:
-	std::vector<float> data_b = `{2.22, 3.33, 4.44}`;
-	`
-	child4b() {}
-	child4b(int i, std::vector<float> v) : data_b(v) { data_base = i; }
+	child4c() {}
+	child4c(int i, double c) : base4(i), data_c(c) {}
 	`
 };
 
+// wrapper struct, for testing
 struct st4 {
 	base4* base_ptr_a;
 	base4* base_ptr_b;
+	base4* base_ptr_c;
 };
 

@@ -9,7 +9,7 @@ enum st1_enum : int {
 };
 `
 
-using my_int64 = long; // copied int the output header
+using my_int64 = long; // copied in the output header
 using s_array_type = int[5];
 using doubles_set = std::set<double>;
 /* only for internal usage of the auto serailizer,

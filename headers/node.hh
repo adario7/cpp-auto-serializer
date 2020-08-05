@@ -163,11 +163,24 @@ public:
 	virtual ~NStruct() { delete name; _DEL_VEC(parents); _DEL_VEC(body); }
 };
 
+class NPolymElem : public Node {
+public:
+	NType* type;
+	bool includeLocal;
+	std::string* include;
+	NPolymElem(segment_t p, NType* t, bool l, std::string* i)
+		: Node(p), type(t), includeLocal(l), include(i) { }
+	virtual ~NPolymElem() { delete type; delete include; }
+
+};
+
+using PolymList = std::vector<NPolymElem*>;
+
 class NPolym : public NRoot {
 public:
 	NType* subject;
-	GenericsList* children;
-	NPolym(segment_t p, NType* s, GenericsList* c)
+	PolymList* children;
+	NPolym(segment_t p, NType* s, PolymList* c)
 		: NRoot(p), subject(s), children(c) {}
 	virtual ~NPolym() { delete subject; _DEL_VEC(children); }
 };

@@ -1,0 +1,12 @@
+`
+#include <types4.hh>
+`
+
+virtual class child4b : public base4 {
+public:
+	std::vector<float> data_b = `{2.22, 3.33, 4.44}`;
+	`
+	child4b() {}
+	child4b(int i, std::vector<float> v) : base4(i), data_b(v) {}
+	`
+};

@@ -5,9 +5,12 @@ using namespace std;
 #include <types1.hh>
 `
 
-// commento
-/* altro
- * commento */
+// comment
+/* these comment
+ * will not be in the output header */
+ `
+ // unless inside backticks
+ `
 
 struct st2 {
 	int a = `3`, b = `3`;
