@@ -21,7 +21,6 @@ int do_121(T& val) {
 	bool got_err = w.deserialize_from(ss,
 		[&](const string& err) -> bool {
 			cout << "deserialization error: " << err << endl;
-			cout.flush();
 			return true; // stop deserialization in case of errors
 		}
 	);
@@ -94,7 +93,6 @@ int test3() {
 // polymorphism test
 int test4() {
 	st4 v;
-	// TODO: any of these being null seg faults serialization
 	v.base_ptr_a = new child4a(222, "new_data_a");
 	v.base_ptr_b = new child4b(333, { 4, 8, 16, 22.5 });
 	v.base_ptr_c = new child4c(444, 71.923);

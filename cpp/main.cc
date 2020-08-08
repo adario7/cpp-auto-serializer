@@ -124,6 +124,7 @@ void compileRoot(NStruct* st) {
 	hout << "\t"; if (st->isVirtual) hout << "virtual ";
 	hout << "void _serialize_to(std::ostream& output, std::unordered_map<void*, std::function<void()>>& pm) const;" << endl
 		<< "\tbool _deserialize_from(std::istream& source, std::function<bool(std::string)> error_callback, std::unordered_map<size_t, __deserialization_ptr>& pm);" << endl
+		<< "\tstatic void* _deserialize_to_ptr(std::istream& source, std::function<bool(std::string)> error_callback, std::unordered_map<size_t, __deserialization_ptr>& pm);" << endl
 		<< "};" << endl << endl;
 	// data ending
 	dout << "}" << endl << endl;
@@ -199,7 +200,25 @@ void compileRoot(NStruct* st) {
 		<< "\t\t__FILL_REFS;" << endl
 		<< "\t}" << endl
 		<< "\treturn 0;" << endl // got to the end -> success
-		<< "}" << endl;
+		<< "}" << endl << endl;
+	dout << "void* " << *st->name <<  "::_deserialize_to_ptr(std::istream& __s, std::function<bool(std::string)> __e, std::unordered_map<size_t, __deserialization_ptr>& __pm) {" << endl;
+	int polym = getPolymOf(st->name);
+	if (!polym) { // standard pointer, no polymorphism involved
+		dout << "\t" << *st->name << "* __v = new " << *st->name << "();" << endl
+			<< "\t__v->_deserialize_from(__s, __e, __pm);" << endl
+			<< "\treturn __v;" << endl;
+	} else {
+		// seek the type without eating it
+		dout << "\tstreampos __pos = __s.tellg();" << endl
+			<< "\tstring __t; __s >> __t;" << endl
+			<< "\t__s.seekg(__pos);" << endl
+			<< "\tconst auto __it = __polym_map_" << polym << ".find(__t);" << endl
+			<< "\tif (__it == __polym_map_" << polym << ".end()) if (__e(\"unknown children type of '"
+			// returning nullptr indicates a failure and stops execution
+			<< *st->name << "': '\" + __t + \"'\")) return ((void*)nullptr);" << endl
+			<< "\treturn __it->second(__s, __e, __pm);" << endl;
+	}
+	dout << "}" << endl << endl;
 }
 
 void openStream(ofstream& stream, const char* arg) {

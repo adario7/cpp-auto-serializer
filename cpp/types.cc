@@ -195,30 +195,24 @@ void w_object(const string& fname, const NType& t, ostream& o) {
 
 void r_pointer(const string& fname, const NType& t, ostream& o) {
 	// tell the root deserializer that the pointer needs to be filled here
-	const NType& pointed_t = *(*t.generics)[0];
+	const NType* ptr_pointed_t = (*t.generics)[0];
+	const NType& pointed_t = *ptr_pointed_t;
 	o << "\t\t\tsize_t __p_" << fname << "; __s >> __p_" << fname << ";" << endl
 		<< "\t\t\tif (__p_" << fname << " == 0) {" << endl
 		<< "\t\t\t" << fname << " = nullptr;" << endl
 		<< "\t\t\t" << "} else {" << endl
 		<< "\t\t\t__deserialization_ptr& __d_" << fname << " = __pm[__p_" << fname << "];" << endl
 		<< "\t\t\t__d_" << fname << ".refs.push_back(&" << fname << ");" << endl
-		<< "\t\t\t__d_" << fname << ".fun = [&, __e](){" << endl;
-	int polym = getPolymOf(&pointed_t);
-	if (!polym) { // standard pointer, no polymorphism involved
+		<< "\t\t\t__d_" << fname << ".fun = [&, __e]() -> void* {" << endl;
+	if (&find_type_pair(ptr_pointed_t) == &rw_object) {
+		// for serializable objects, use the deserialize_to_ptr, which handles polymorphism
+		o << "\t\t\treturn " << pointed_t << "::_deserialize_to_ptr(__s, __e, __pm);" << endl;
+	} else {
+		// for other types, deserialize as usual
 		o << "\t\t\t" << pointed_t << "* __v_" << fname << " = new " << pointed_t << "();" << endl
 			<< "\t\t\t" << pointed_t << "& __r_" << fname << " = *__v_" << fname << ";" << endl;
 		deserialize_value("__r_" + fname, pointed_t, o);
 		o << "\t\t\treturn __v_" << fname << ";" << endl;
-	} else {
-		// seek the type without eating it
-		o << "\t\t\tstreampos __pos_" << fname << " = __s.tellg();" << endl
-			<< "\t\t\tstring __t_" << fname << "; __s >> __t_" << fname << ";" << endl
-			<< "\t\t\t__s.seekg(__pos_" << fname << ");" << endl
-			<< "\t\t\tconst auto __it_" << fname << " = __polym_map_" << polym << ".find(__t_" << fname << ");" << endl
-			<< "\t\t\tif (__it_" << fname << " == __polym_map_" << polym << ".end()) if (__e(\"unknown children type of '"
-			// returning nullptr indicates a failure and stops execution
-			<< pointed_t << "': '\" + __t_" << fname << " + \"'\")) return ((void*)nullptr);" << endl
-			<< "\t\t\treturn __it_" << fname << "->second(__s, __e, __pm);" << endl;
 	}
 	o << "\t\t\t};" << endl
 		<< "\t\t\t}" << endl;
