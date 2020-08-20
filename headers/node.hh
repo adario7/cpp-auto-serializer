@@ -145,11 +145,11 @@ public:
 
 class NParent : public Node {
 public:
-	std::string *code_prev, *code_next;
+	std::string *code_prev;
 	NType* type;
-	NParent(segment_t s, std::string* p, NType* t, std::string* n)
-		: Node(s), code_prev(p), type(t), code_next(n) {}
-	virtual ~NParent() { delete code_prev; delete type; delete code_next; }
+	NParent(segment_t s, std::string* p, NType* t)
+		: Node(s), code_prev(p), type(t) {}
+	virtual ~NParent() { delete code_prev; delete type; }
 };
 
 class NStruct : public NRoot {
@@ -157,10 +157,11 @@ public:
 	bool isVirtual, isClass;
 	NType* name;
 	ParentsList* parents;
+	std::string* code_parents;
 	BodyList* body;
-	NStruct(segment_t p, bool iv, bool ic, NType* n, ParentsList* e, BodyList* b)
-		: NRoot(p), isVirtual(iv), isClass(ic), name(n), parents(e), body(b) {}
-	virtual ~NStruct() { delete name; _DEL_VEC(parents); _DEL_VEC(body); }
+	NStruct(segment_t p, bool iv, bool ic, NType* n, ParentsList* e, std::string* c, BodyList* b)
+		: NRoot(p), isVirtual(iv), isClass(ic), name(n), parents(e), code_parents(c), body(b) {}
+	virtual ~NStruct() { delete name; _DEL_VEC(parents); delete code_parents; _DEL_VEC(body); }
 };
 
 class NPolymElem : public Node {

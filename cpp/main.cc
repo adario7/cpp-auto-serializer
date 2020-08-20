@@ -91,10 +91,10 @@ void compileRoot(NStruct* st) {
 		for (NParent* p : *st->parents) {
 			compileCode(p->code_prev);
 			hout << " " << *p->type << " "; // add spaces to separate from code blocks
-			compileCode(p->code_next);
 			if (++i < parents_len) hout << ",";
 		}
 	}
+	compileCode(st->code_parents);
 	hout << " {" << endl;
 	// data preface
 	dout << "#undef __AS_CTX" << endl // prevent compilation warnings

@@ -185,7 +185,7 @@ struct_body_0 : struct_body
 virtual_as_bool : "virtual" { $$ = true; }
                 | %empty { $$ = false; } ;
 
-parent_class : code_block_0 decl_type code_block_0 { $$ = new NParent(_P(@$), $1, $2, $3); }
+parent_class : code_block_0 decl_type { $$ = new NParent(_P(@$), $1, $2); }
 
 parents_list_c : parent_class { $$ = new ParentsList(); $$->push_back($1); }
                | parents_list_c "," parent_class { $1->push_back($3); }
@@ -195,8 +195,8 @@ parents_list : ":" parents_list_c { $$ = $2; }
              | %empty { $$ = new ParentsList(); }
              ;
 
-nstruct : virtual_as_bool cls_or_struct decl_type parents_list T_L_BRACE struct_body_0 T_R_BRACE T_SEMIC
-                { $$ = new NStruct(_P(@$), $1, $2, $3, $4, $6); } ; 
+nstruct : virtual_as_bool cls_or_struct decl_type parents_list code_block_0 T_L_BRACE struct_body_0 T_R_BRACE T_SEMIC
+                { $$ = new NStruct(_P(@$), $1, $2, $3, $4, $5, $7); } ; 
 
 polym_elem : compl_type { $$ = new NPolymElem(_P(@$), $1, false, nullptr); }
 		   | compl_type "local include" { $$ = new NPolymElem(_P(@$), $1, true, $2); }
