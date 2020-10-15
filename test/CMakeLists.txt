@@ -42,7 +42,7 @@ endforeach()
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../headers")
 
-add_executable(tester
+add_executable(test
 	${SOURCES}
 	${AUTOH_OUTPUTS}
 )
