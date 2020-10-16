@@ -28,7 +28,7 @@ class Node {
 public:
 	segment_t pos;
 	Node(segment_t p) : pos(p) {}
-    virtual ~Node() {}
+	virtual ~Node() {}
 };
 
 class NBodyElem : public Node {
@@ -45,8 +45,8 @@ public:
 
 class NIdentifier : public Node {
 public:
-    std::string value;
-    NIdentifier(segment_t p, const std::string&& value)
+	std::string value;
+	NIdentifier(segment_t p, const std::string&& value)
 		: Node(p), value(std::move(value)) { }
 	virtual ~NIdentifier() {}
 };
@@ -96,19 +96,19 @@ namespace std {
 template<>
 class hash<NType> {
 public:
-    size_t operator()(const NType& s) const;
+	size_t operator()(const NType& s) const;
 };
 }
 
 class NVarDeclaration : public Node {
 public:
 	TypeSuffixList* tSuffixes;
-    NIdentifier* name;
+	NIdentifier* name;
 	ArraySuffixList* arraySuffixes;
 	std::string* assignment;
 	NType* completeType;
-    NVarDeclaration(segment_t p, TypeSuffixList* s, NIdentifier* n, ArraySuffixList* as, std::string* a)
-        : Node(p), tSuffixes(s), arraySuffixes(as), name(n), assignment(a) {}
+	NVarDeclaration(segment_t p, TypeSuffixList* s, NIdentifier* n, ArraySuffixList* as, std::string* a)
+		: Node(p), tSuffixes(s), arraySuffixes(as), name(n), assignment(a) {}
 	virtual ~NVarDeclaration() { delete tSuffixes; delete name; _OPT_DEL(assignment); delete completeType; }
 };
 
@@ -121,7 +121,7 @@ public:
 		: NBodyElem(p), type(type), vars(vars) {
 		// complete type: int* --> *<int> and int* a, b --> *<int> a; int b
 		for (NVarDeclaration* d : *vars) {
-			NType* ct = type->deepCopy(); 
+			NType* ct = type->deepCopy();
 			for (int i = 0; i < d->tSuffixes->size(); i++)
 				ct = NType::pointerTo(ct, d->pos);
 			// loop backwards otherwise dimesntions will be inverted

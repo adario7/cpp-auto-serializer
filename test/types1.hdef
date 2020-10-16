@@ -14,7 +14,7 @@ using s_array_type = int[5];
 using doubles_set = std::set<double>;
 /* only for internal usage of the auto serailizer,
  * will be discarded during the header generation */
-alias st1_enum = int; 
+alias st1_enum = int;
 
 struct st1 {
 	st1_enum a = `ST1_B`;

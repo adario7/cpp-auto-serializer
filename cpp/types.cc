@@ -81,7 +81,7 @@ void deserialize_field(const std::string& fname, const NType& orig_t, std::ostre
 	} \
 	void r_##type(const string& fname, const NType&, ostream& o) { \
 		o << "\t\t\t__s >> ((" << #type << "&) " << fname << ");" << endl; \
-	} 
+	}
 
 _NATIVE_M(bool)
 _NATIVE_M(int8_t) _NATIVE_M(int16_t) _NATIVE_M(int32_t) _NATIVE_M(int64_t)
@@ -99,10 +99,10 @@ void r_string(const string& fname, const NType&, ostream& o) {
 		<< "\t\t\t__s.get(&" << fname << ".front(), __" << fname << "_sz+1, '\\0');" << endl; // +1 because .get reads n-1 chars
 }
 
-#define _GENERATE_FOR_SZ(sz_value)                     \
-	"\tfor (size_t __i_" << fname << " = 0; "      \
-	<< "__i_" << fname << " < " << sz_value << "; "    \
-	<< "__i_" << fname << "++) {" << endl 
+#define _GENERATE_FOR_SZ(sz_value)					 \
+	"\tfor (size_t __i_" << fname << " = 0; "	  \
+	<< "__i_" << fname << " < " << sz_value << "; "	\
+	<< "__i_" << fname << "++) {" << endl
 #define _GENERATE_FOR _GENERATE_FOR_SZ("__" << fname << "_sz")
 
 void w_static_array(const string& fname, const NType& t, ostream& o) {
@@ -132,7 +132,7 @@ void r_static_array(const string& fname, const NType& t, ostream& o) {
 void w_vector(const string& fname, const NType& t, ostream& o) {
 	GenericsList& list = *t.generics;
 	if (list.size() < 1) throw runtime_error("std::vector, std:set or std::unordered_set are expected to have at least one generic type, but got: " + to_string(t));
-	const NType& e_t = *list[0]; 
+	const NType& e_t = *list[0];
 	o << "\t__s << " << fname << ".size() << ' '; " << endl
 		<< "\tfor (const auto& __e_" << fname << " : " << fname << ") {" << endl;
 	serialize_value("__e_" + fname, e_t, o);
@@ -161,10 +161,10 @@ void r_vector(const string& fname, const NType& t, ostream& o) {
 void w_map(const string& fname, const NType& t, ostream& o) {
 	GenericsList& list = *t.generics;
 	if (list.size() < 2) throw runtime_error("std::map or std::unordered_map are expected to have at least two generic types, but got: " + to_string(t));
-	const NType& k_t = *list[0], &v_t = *list[1]; 
+	const NType& k_t = *list[0], &v_t = *list[1];
 	o << "\t__s << " << fname << ".size() << ' '; " << endl
 		<< "\tfor (const auto& __e_" << fname << " : " << fname << ") {" << endl
-		<< "\tconst auto& __k_" << fname << " = __e_" << fname << ".first; " 
+		<< "\tconst auto& __k_" << fname << " = __e_" << fname << ".first; "
 		<< "const auto& __v_" << fname << " = __e_" << fname << ".second;" << endl;
 	serialize_value("__k_" + fname, k_t, o);
 	o << "\t__s << ' ';" << endl;

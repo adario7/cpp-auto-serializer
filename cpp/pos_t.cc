@@ -5,7 +5,7 @@ using namespace std;
 
 ostream& operator<<(ostream& os, const pos_t& p) {
 	os << p.line << ":" << p.col;
-    return os;
+	return os;
 }
 
 string to_string(const pos_t& p) {
@@ -14,7 +14,7 @@ string to_string(const pos_t& p) {
 
 ostream& operator<<(ostream& os, const segment_t& p) {
 	os << p.start << "->" << p.end;
-    return os;
+	return os;
 }
 
 string to_string(const segment_t& p) {

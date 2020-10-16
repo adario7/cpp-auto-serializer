@@ -43,7 +43,7 @@ int test1() {
 	v.does_it_work = true;
 	v.strings = { "hey", "there" };
 	v.matrix = { { 3, 5, 6},
-	             { 6, 7, 7, 9 },
+				 { 6, 7, 7, 9 },
 				 { 3, 1, -3 } };
 	v.doubles = { 3.14, 6.28, 9.42 };
 	v.intToFloat = { {0, 1}, {1, 2.72}, {2, 7.39} };
@@ -65,7 +65,7 @@ int test2() {
 	st1& v = t2.sub1;
 	v.strings = { "hey", "there" };
 	v.matrix = { { 3, 5, 6},
-	             { 6, 7, 7, 9 },
+				 { 6, 7, 7, 9 },
 				 { 3, 1, -3 } };
 	v.doubles = { 3.14, 6.28, 9.42 };
 	v.intToFloat = { {0, 1}, {1, 2.72}, {2, 7.39} };

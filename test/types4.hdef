@@ -10,8 +10,8 @@ using namespace std;
  * when we specify the children header in this way it is only included in the generated implementation code
 */
 polymorphic base4 :
-    child4a include "types4a.hh",
-    child4b include "types4b.hh",
+	child4a include "types4a.hh",
+	child4b include "types4b.hh",
 	child4c /* don't need to include because it is in the same .hdef header*/;
 
 virtual class base4 {

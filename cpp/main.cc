@@ -55,7 +55,7 @@ void compileBlock(NStruct* st, NVarBlock* block) {
 		string& fname = dec.name->value;
 		// insert in the header
 		hout << " ";
-		for (int j = 0; j < dec.tSuffixes->size(); j++) 
+		for (int j = 0; j < dec.tSuffixes->size(); j++)
 			hout << "*"; // can't be anything else
 		hout << fname;
 		for (string* size : *dec.arraySuffixes)
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
 		<< "#include <unordered_map>" << endl // for state
 		<< "#include <iosfwd>" << endl // for (de)serialization input/output
 		<< "struct __deserialization_ptr;" << endl;
-	dout << "#include \"" << argv[2] << "\"" << endl 
+	dout << "#include \"" << argv[2] << "\"" << endl
 		<< "#include <ostream>" << endl
 		<< "#include <istream>" << endl
 		<< "#include <functional>" << endl
@@ -252,7 +252,7 @@ int main(int argc, char **argv) {
 		<< "\t\tstring __tname; __s >> __tname; \\" << endl
 		<< "\t\tif (__tname != exp && __e(__AS_CTX + \": expected type '\"s + exp + \"', got '\" + __tname + \"'\")) return true; \\" << endl
 		<< "\t} while (false)" << endl << endl
-		<< "#define __FILL_REFS           \\" << endl
+		<< "#define __FILL_REFS		   \\" << endl
 		<< "\tfor (void* __r : __refs)  \\" << endl
 		<< "\t\t* (void**) __r = __v;" << endl << endl // they are guaranteed to be pointers to pointers
 		<< "struct __deserialization_ptr {" << endl
@@ -260,10 +260,10 @@ int main(int argc, char **argv) {
 		<< "\tfunction<void*()> fun;" << endl
 		<< "};" << endl << endl;
 
-    yyparse();
+	yyparse();
 
 	fclose(yyin);
 	hout.close();
 	dout.close();
-    return 0;
+	return 0;
 }
