@@ -99,8 +99,8 @@ void r_string(const string& fname, const NType&, ostream& o) {
 		<< "\t\t\t__s.get(&" << fname << ".front(), __" << fname << "_sz+1, '\\0');" << endl; // +1 because .get reads n-1 chars
 }
 
-#define _GENERATE_FOR_SZ(sz_value)					 \
-	"\tfor (size_t __i_" << fname << " = 0; "	  \
+#define _GENERATE_FOR_SZ(sz_value) \
+	"\tfor (size_t __i_" << fname << " = 0; " \
 	<< "__i_" << fname << " < " << sz_value << "; "	\
 	<< "__i_" << fname << "++) {" << endl
 #define _GENERATE_FOR _GENERATE_FOR_SZ("__" << fname << "_sz")

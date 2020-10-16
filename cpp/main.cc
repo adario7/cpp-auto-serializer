@@ -252,9 +252,10 @@ int main(int argc, char **argv) {
 		<< "\t\tstring __tname; __s >> __tname; \\" << endl
 		<< "\t\tif (__tname != exp && __e(__AS_CTX + \": expected type '\"s + exp + \"', got '\" + __tname + \"'\")) return true; \\" << endl
 		<< "\t} while (false)" << endl << endl
-		<< "#define __FILL_REFS		   \\" << endl
-		<< "\tfor (void* __r : __refs)  \\" << endl
-		<< "\t\t* (void**) __r = __v;" << endl << endl // they are guaranteed to be pointers to pointers
+		<< "#define __FILL_REFS do { \\" << endl
+		<< "\t\tfor (void* __r : __refs) \\" << endl
+		<< "\t\t\t* (void**) __r = __v; \\" << endl // they are guaranteed to be pointers to pointers
+		<< "\t} while (false);" << endl << endl
 		<< "struct __deserialization_ptr {" << endl
 		<< "\tvector<void*> refs;" << endl
 		<< "\tfunction<void*()> fun;" << endl
