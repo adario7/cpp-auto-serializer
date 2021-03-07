@@ -124,7 +124,7 @@ void r_static_array(const string& fname, const NType& t, ostream& o) {
 		<< "if (__e(\"wrong static array size: got \" + to_string(__" << fname << "_sz)"
 		<< "+ \", expected \" + to_string(" << size << "))) return true;" << endl
 		<< "\t\t" << _GENERATE_FOR
-		<< "\t\t\tconst auto& __e_" << fname << " = " << fname << "[__i_" << fname << "];" << endl;
+		<< "\t\t\tauto& __e_" << fname << " = " << fname << "[__i_" << fname << "];" << endl;
 	deserialize_value("__e_" + fname, e_t, o);
 	o << "\t}" << endl;
 }
