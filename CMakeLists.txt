@@ -16,10 +16,14 @@ ADD_FLEX_BISON_DEPENDENCY(ASScanner ASParser)
 
 include_directories(${TAB_DIRECTORY})
 include_directories(headers)
-file(GLOB_RECURSE SOURCES "cpp/*.cc")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "cpp/*.cc")
 
-add_executable(auto-serializer
+set(BIN_NAME auto-serializer)
+add_executable(${BIN_NAME}
 	${SOURCES}
 	${FLEX_ASScanner_OUTPUTS}
 	${BISON_ASParser_OUTPUTS}
 )
+
+install(TARGETS ${BIN_NAME}
+	CONFIGURATIONS Release)
