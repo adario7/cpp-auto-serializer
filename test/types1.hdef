@@ -21,7 +21,7 @@ struct st1 {
 	my_int64 b = 555;
 	bool does_it_work = false;
 	int* ptr = `nullptr`;
-	std::vector<float*> ptrVec = ` { nullptr } `;
+	std::vector<float*> ptrVec = `{ nullptr }`;
 	std::vector<std::string> strings = `{ "v_0", "v_1" }`;
 	std::string str = "initial value";
 	std::vector<std::vector<int>> matrix;

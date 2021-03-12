@@ -81,6 +81,9 @@ void deserialize_field(const std::string& fname, const NType& orig_t, std::ostre
 	} \
 	void r_##type(const string& fname, const NType&, ostream& o) { \
 		o << "\t\t\t__s >> ((" << #type << "&) " << fname << ");" << endl; \
+		o << "\t\t\tif (__s.fail()) if (__e(__AS_CTX \"." << fname \
+			/* this `return 0` is either a 0 or a nullptr, both mean a failure in different contextes */ \
+			<< ": expected a " << #type << ", but parsing failed\")) return 0;" << endl; \
 	}
 
 _NATIVE_M(bool)
@@ -122,7 +125,7 @@ void r_static_array(const string& fname, const NType& t, ostream& o) {
 	o << "\t\t\tsize_t __" << fname << "_sz; __s >> __" << fname << "_sz;" << endl
 		<< "\t\t\tif (__" << fname << "_sz != (" << size << ")) "
 		<< "if (__e(\"wrong static array size: got \" + to_string(__" << fname << "_sz)"
-		<< "+ \", expected \" + to_string(" << size << "))) return true;" << endl
+		<< "+ \", expected \" + to_string(" << size << "))) return 0;" << endl
 		<< "\t\t" << _GENERATE_FOR
 		<< "\t\t\tauto& __e_" << fname << " = " << fname << "[__i_" << fname << "];" << endl;
 	deserialize_value("__e_" + fname, e_t, o);
@@ -186,7 +189,7 @@ void r_map(const string& fname, const NType& t, ostream& o) {
 }
 
 void r_object(const string& fname, const NType& t, ostream& o) {
-	o << "\t\t\t" << fname << "._deserialize_from(__s, __e, __pm);" << endl;	
+	o << "\t\t\tif (!" << fname << "._deserialize_from(__s, __e, __pm)) return 0;" << endl;	
 }
 
 void w_object(const string& fname, const NType& t, ostream& o) {

@@ -77,7 +77,7 @@ void compileDsBlock(NStruct* st, NVarBlock* block) {
 		string& fname = dec.name->value;
 		dout << "\t\t{\"" << fname << "\", [&, __e](" << *st->name << "& __v) -> bool {" << endl;
 		deserialize_field(fname, *dec.completeType, dout);
-		dout << "\t\t\treturn 0;" << endl // got to the end -> success
+		dout << "\t\t\treturn 1;" << endl // got to the end -> success
 			<< "\t\t} }," << endl;
 	}
 }
@@ -131,7 +131,7 @@ void compileRoot(NStruct* st) {
 	dout << "bool " << *st->name << "::_deserialize_from(istream& __s, function<bool(string)> __e, unordered_map<size_t, __deserialization_ptr>& __pm) {" << endl
 		<< "\t__TYPE_CHK(\"" << *st->name << "\");" << endl
 		<< "\tsize_t __count; __s >> __count;" << endl
-		<< "\tif (__count != " << fields_count << ") ""if (__e( \"'" << *st->name << "': read \" + to_string(__count) + \" fields, expected " << fields_count << "\")) return true;" << endl;
+		<< "\tif (__count != " << fields_count << ") ""if (__e( \"'" << *st->name << "': read \" + to_string(__count) + \" fields, expected " << fields_count << "\")) return 0;" << endl;
 	// before fileds, deserialize parent classes
 	for (NParent* p : *st->parents)
 		dout << "\t" << *p->type << "::_deserialize_from(__s, __e, __pm);" << endl;
@@ -145,11 +145,11 @@ void compileRoot(NStruct* st) {
 		<< "\tfor (size_t __i = 0; __i < __count; __i++) {" << endl
 		<< "\t\tstring __fn; __s >> __fn;" << endl
 		<< "\t\tconst auto& __itr = __map.find(__fn);" << endl
-		<< "\t\tif (__itr == __map.end()) if(__e(\"'" << *st->name << "': unknown field '\" + __fn + \"'\")) return true;" << endl
+		<< "\t\tif (__itr == __map.end()) if(__e(\"'" << *st->name << "': unknown field '\" + __fn + \"'\")) return 0;" << endl
 		// return if the field fails deserializing
-		<< "\t\tif (__itr->second(*this)) return true;" << endl
+		<< "\t\tif (!__itr->second(*this)) return 0;" << endl
 		<< "\t}" << endl
-		<< "\treturn 0;" << endl // got to the end -> success
+		<< "\treturn 1;" << endl // got to the end -> success
 		<< "}" << endl << endl;
 	// implement user-side methods
 	dout << "void " << *st->name << "::serialize_to(ostream& __s) const {" << endl
@@ -171,14 +171,14 @@ void compileRoot(NStruct* st) {
 		<< "}" << endl << endl;
 	dout << "bool " << *st->name << "::deserialize_from(std::istream& __s, function<bool(string)> __e) {" << endl
 		<< "\tunordered_map<size_t, __deserialization_ptr> __pm;" << endl
-		<< "\tif (_deserialize_from(__s, __e, __pm)) return true;" << endl
+		<< "\tif (!_deserialize_from(__s, __e, __pm)) return 0;" << endl
 		<< "\tunordered_map<size_t, void*> __done;" << endl
 		<< "\twhile (!__pm.empty()) {" << endl
 		<< "\t\twhile (\" \\t\\n\\r\"s.find(__s.peek()) != string::npos) { __s.ignore(); }" << endl
 		<< "\t\tif (__s.peek() == EOF) break;" << endl
 		<< "\t\tsize_t __k; __s >> __k;" << endl
 		<< "\t\tconst auto& __it = __pm.find(__k);" << endl
-		<< "\t\tif (__it == __pm.end()) if (__e(\"definition of undeclared pointer: \" + to_string(__k))) return true;" << endl
+		<< "\t\tif (__it == __pm.end()) if (__e(\"definition of undeclared pointer: \" + to_string(__k))) return 0;" << endl
 		// avoid modifying the map while iterating
 		<< "\t\tconst auto __fun = __it->second.fun;" << endl
 		<< "\t\tconst auto __refs = move(__it->second.refs);" << endl
@@ -186,7 +186,7 @@ void compileRoot(NStruct* st) {
 		<< "\t\tvoid* __v;" << endl
 		<< "\t\tconst auto& __d_it = __done.find(__k);" << endl
 		// function callback returning nullptr indicates a failure
-		<< "\t\tif (__d_it == __done.end()) { __v = __done[__k] = __fun(); if (!__v) return true; }" << endl
+		<< "\t\tif (__d_it == __done.end()) { __v = __done[__k] = __fun(); if (!__v) return 0; }" << endl
 		<< "\t\telse __v = __d_it->second;" << endl // avoid endless recursion
 		<< "\t\t__FILL_REFS;" << endl
 		<< "\t}" << endl
@@ -195,11 +195,11 @@ void compileRoot(NStruct* st) {
 		<< "\t\tsize_t __k = __p.first;" << endl
 		<< "\t\tconst auto& __refs = __p.second.refs;" << endl
 		<< "\t\tconst auto __it = __done.find(__k);" << endl
-		<< "\t\tif (__it == __done.end()) if (__e(\"unexpected EOF, pointer definition still missing: \" + to_string(__k))) return true;" << endl
+		<< "\t\tif (__it == __done.end()) if (__e(\"unexpected EOF, pointer definition still missing: \" + to_string(__k))) return 0;" << endl
 		<< "\t\tvoid* __v = __it->second;" << endl
 		<< "\t\t__FILL_REFS;" << endl
 		<< "\t}" << endl
-		<< "\treturn 0;" << endl // got to the end -> success
+		<< "\treturn 1;" << endl // got to the end -> success
 		<< "}" << endl << endl;
 	dout << "void* " << *st->name <<  "::_deserialize_to_ptr(std::istream& __s, std::function<bool(std::string)> __e, std::unordered_map<size_t, __deserialization_ptr>& __pm) {" << endl;
 	int polym = getPolymOf(st->name);
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
 		<< "using namespace std;" << endl << endl
 		<< "#define __TYPE_CHK(exp) do { \\" << endl
 		<< "\t\tstring __tname; __s >> __tname; \\" << endl
-		<< "\t\tif (__tname != exp && __e(__AS_CTX + \": expected type '\"s + exp + \"', got '\" + __tname + \"'\")) return true; \\" << endl
+		<< "\t\tif (__tname != exp && __e(__AS_CTX + \": expected type '\"s + exp + \"', got '\" + __tname + \"'\")) return 0; \\" << endl
 		<< "\t} while (false)" << endl << endl
 		<< "#define __FILL_REFS do { \\" << endl
 		<< "\t\tfor (void* __r : __refs) \\" << endl

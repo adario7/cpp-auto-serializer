@@ -4,34 +4,55 @@
 #include <types4.hh>
 #include <types4a.hh>
 #include <types4b.hh>
+
 #include <iostream>
 #include <sstream>
 
 using namespace std;
 
+int mode = 0;
+
 template<typename T>
-int do_121(T& val) {
-	stringstream ss;
-	val.serialize_to(ss);
-	cout << "ORIG / " << &val << ": {{{" << endl << endl
-		<< ss.str() << endl
-		<< endl << "}}}" << endl << endl;
-
-	T w;
-	bool got_err = w.deserialize_from(ss,
-		[&](const string& err) -> bool {
-			cout << "deserialization error: " << err << endl;
-			return true; // stop deserialization in case of errors
-		}
-	);
-	if (got_err) return 1;
-
-	stringstream tt;
-	w.serialize_to(tt);
-	cout << "COPY / " << &w << ": {{{" << endl << endl
-		<< tt.str() << endl
-		<< endl << "}}}" << endl;
-
+int test_it(T& v) {
+	if (mode == 0) {
+		// test both serealization and deserialization, should produce identical outputs
+		stringstream ss;
+		v.serialize_to(ss);
+		cout << "ORIG / " << &v << ": {{{" << endl << endl
+			<< ss.str() << endl
+			<< endl << "}}}" << endl << endl;
+		T w;
+		bool ok = w.deserialize_from(ss,
+			[&](const string& err) -> bool {
+				cerr << "deserialization error: " << err << endl;
+				return true; // stop deserialization in case of errors
+			}
+		);
+		if (!ok) return 1;
+		stringstream tt;
+		w.serialize_to(tt);
+		cout << "COPY / " << &w << ": {{{" << endl << endl
+			<< tt.str() << endl
+			<< endl << "}}}" << endl;
+	} else if (mode == 1) {
+		// test deserialization, reding from stdin
+		T w;
+		bool ok = w.deserialize_from(cin,
+			[&](const string& err) -> bool {
+				cerr << "deserialization error: " << err << endl;
+				return true; // stop deserialization in case of errors
+			}
+		);
+		if (!ok) return 1;
+		stringstream tt;
+		w.serialize_to(tt);
+		cout << "COPY / " << &w << ": {{{" << endl << endl
+			<< tt.str() << endl
+			<< endl << "}}}" << endl;	
+	} else if (mode == 2) {
+		// test serialization, writing to stdout
+		v.serialize_to(cout);
+	}
 	return 0;
 }
 
@@ -55,7 +76,7 @@ int test1() {
 	v.s_array[3] = 444444;
 	v.s_matrix[1][1] = 444111;
 
-	return do_121<st1>(v);	
+	return test_it<st1>(v);	
 }
 
 // object encapsulation test
@@ -73,8 +94,12 @@ int test2() {
 	t2.vec1.resize(2);
 	t2.vec1[0].strings.push_back("FIRST SUB ELEM");
 	t2.vec1[1].b = 123456;
+	t2.vec1[0].ptr = new int;
+	*t2.vec1[0].ptr = 444;
+	t2.vec1[1].ptrVec.push_back(new float);
+	*t2.vec1[1].ptrVec[1] = 88.88;
 
-	return do_121<st2>(t2);
+	return test_it<st2>(t2);
 }
 
 // recursive pointers test
@@ -87,7 +112,7 @@ int test3() {
 	st3 v;
 	v.real = a;
 
-	return do_121<st3>(v);
+	return test_it<st3>(v);
 }
 
 // polymorphism test
@@ -97,13 +122,19 @@ int test4() {
 	v.base_ptr_b = new child4b(333, { 4, 8, 16, 22.5 });
 	v.base_ptr_c = new child4c(444, 71.923);
 	
-	return do_121<st4>(v);
+	return test_it<st4>(v);
 }
 
 #define _TEST(n) \
-	cout << "--- TEST " << #n << " ---" << endl << endl; \
+	cerr << "--- TEST " << #n << " ---" << endl << endl; \
 	return test##n();
 
-int main() {
+int main(int argc, char** argv) {
+	if (argc > 1) {
+		// input mode
+		if (argv[1][0] == 'i') mode = 1;
+		// output mode
+		if (argv[1][0] == 'o') mode = 2;
+	}
 	_TEST(1);
 }

@@ -37,10 +37,10 @@ data1.serialize_to(file_out);
 // deserialization
 ifstream file_in(<...>);
 example_data data2;
-bool got_err = data2.deserialize_from(file_int,
+bool ok = data2.deserialize_from(file_in,
 	[&](const string& err) -> bool { // error callback
 		std::cerr << "deserialization error: " << err << std::endl;
-		return true; // true stop deserialization in case of errors
+		return true; // true = stop deserialization after this error
 	}
 );
 ```

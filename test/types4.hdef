@@ -5,14 +5,15 @@ using namespace std;
 `
 
 /* specify which type a base4* could be at runtime.
- * the generated deserialization code needs to include the children header
- * but doing so here (in this .def header) would create a cyclic dependency;
- * when we specify the children header in this way it is only included in the generated implementation code
+ * the generated deserialization code needs to include the children headers
+ * but doing so here (in this .hdef header) would create a cyclic dependency;
+ * when we specify the children header in this way it is only included
+ * in the generated implementation code, and not in the generated header
 */
 polymorphic base4 :
 	child4a include "types4a.hh",
 	child4b include "types4b.hh",
-	child4c /* don't need to include because it is in the same .hdef header*/;
+	child4c /* no need for include directives because it is in the same .hdef header */;
 
 virtual class base4 {
 public:
