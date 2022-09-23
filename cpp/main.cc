@@ -104,7 +104,7 @@ void compileRoot(NStruct* st) {
 	for (NBodyElem* elem : *st->body)
 		IF_TYPE(elem, NVarBlock, block)
 			fields_count += block->vars->size();
-	dout << "\t__s << \"" << *st->name << " " << fields_count << "\" << endl;" << endl;
+	dout << "\t__s << \"" << *st->name << " " << fields_count << "\" << \"\\n\";" << endl;
 	// before fileds, serialize parent classes
 	for (NParent* p : *st->parents)
 		dout << "\t" << *p->type << "::_serialize_to(__s, __pm);" << endl;
@@ -165,7 +165,7 @@ void compileRoot(NStruct* st) {
 		<< "\t\t\telse __done.insert(__p.first);" << endl
 		<< "\t\t\t__s << ((size_t) __p.first) << ' ';" << endl
 		<< "\t\t\t__p.second();" << endl
-		<< "\t\t\t__s << endl;" << endl
+		<< "\t\t\t__s << \"\\n\";" << endl
 		<< "\t\t}" << endl
 		<< "\t}" << endl
 		<< "}" << endl << endl;

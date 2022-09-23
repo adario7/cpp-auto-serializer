@@ -54,7 +54,7 @@ void serialize_field(const std::string& fname, const NType& orig_t, std::ostream
 	const rw_pair& pair = find_type_pair(real_t);
 	o << "\t__s << \"" << fname << " " << *real_t << " \";" << endl;
 	serialize_value(fname, *real_t, pair, o);
-	o << "\t__s << endl;" << endl;
+	o << "\t__s << \"\\n\";" << endl;
 }
 
 void deserialize_value(const std::string& fname, const NType& t, const rw_pair& pair, std::ostream& o) {
